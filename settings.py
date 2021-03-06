@@ -104,7 +104,7 @@ MESSAGE_TEMPLATE = '''
     今日奖励: {award_name} × {award_cnt}<br>
     本月累签: {total_sign_day} 天<br>
     签到结果: {status}<br>
-    {end:#^28}'''
+    {end:#^28}<br>'''
 
 CONFIG.MESSAGE_TEMPLATE = MESSAGE_TEMPLATE
 
