@@ -100,7 +100,7 @@ log.basicConfig(level=CONFIG.LOG_LEVEL)
 
 MESSAGE_TEMPLATE = '''
     <br>{today:#^28}<br>
-    🔅[{region_name}]{uid}<br>
+    通行证ID: {uid}<br>
     今日奖励: {award_name} × {award_cnt}<br>
     本月累签: {total_sign_day} 天<br>
     签到结果: {status}<br>
