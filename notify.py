@@ -57,29 +57,9 @@ class Notify(object):
     """
     # Github Actions用户请到Repo的Settings->Secrets里设置变量,变量名字必须与上述参数变量名字完全一致,否则无效!!!
     # Name=<变量名字>,Value=<获取的值>
-    # Server Chan
-    SCKEY = ''
-    # Cool Push
-    COOL_PUSH_SKEY = ''
-    COOL_PUSH_MODE = 'send'
-    # iOS Bark App
-    BARK_KEY = ''
-    BARK_SOUND = 'healthnotification'
     # Telegram Bot
     TG_BOT_TOKEN = ''
     TG_USER_ID = ''
-    # DingTalk Bot
-    DD_BOT_TOKEN = ''
-    DD_BOT_SECRET = ''
-    # WeChat Work Bot
-    WW_BOT_KEY = ''
-    # WeChat Work App
-    WW_ID = ''
-    WW_APP_SECRET = ''
-    WW_APP_USERID = '@all'
-    WW_APP_AGENTID = ''
-    # iGot聚合推送
-    IGOT_KEY = ''
     # pushplus
     PUSH_PLUS_TOKEN = ''
     PUSH_PLUS_USER = ''
@@ -116,63 +96,7 @@ class Notify(object):
             else:
                 log.error(f'{name} 😳\n{response}')
 
-    def serverChan(self, text, status, desp):
-        SCKEY = self.SCKEY
-        if 'SCKEY' in os.environ:
-            SCKEY = os.environ['SCKEY']
 
-        url = f'https://sc.ftqq.com/{SCKEY}.send'
-        data = {
-            'text': f'{text} {status}',
-            'desp': desp
-        }
-        conf = ['Server酱', 'SCKEY', SCKEY, 'errno', 0]
-        name, needs, token, text, code  = conf
-
-        return self.pushTemplate('post', url, data=data, name=name, needs=needs, token=token, text=text, code=code)
-
-    def coolPush(self, text, status, desp):
-        COOL_PUSH_SKEY = self.COOL_PUSH_SKEY
-        if 'COOL_PUSH_SKEY' in os.environ:
-            COOL_PUSH_SKEY = os.environ['COOL_PUSH_SKEY']
-
-        COOL_PUSH_MODE = self.COOL_PUSH_MODE
-        if 'COOL_PUSH_MODE' in os.environ:
-            COOL_PUSH_MODE = os.environ['COOL_PUSH_MODE']
-
-        url = f'https://push.xuthus.cc/{COOL_PUSH_MODE}/{COOL_PUSH_SKEY}'
-        data = f'{text} {status}\n\n{desp}'.encode('utf-8')
-        conf = ['Cool Push', 'COOL_PUSH_SKEY', COOL_PUSH_SKEY, 'code', 200]
-        name, needs, token, text, code  = conf
-
-        return self.pushTemplate('post', url, data=data, name=name, needs=needs, token=token, text=text, code=code)
-
-    def bark(self, text, status, desp):
-        BARK_KEY = self.BARK_KEY
-        if 'BARK_KEY' in os.environ:
-            # 自建服务端的用户
-            if os.environ['BARK_KEY'].find(
-                'https') != -1 or os.environ['BARK_KEY'].find('http') != -1:
-                BARK_KEY = os.environ['BARK_KEY']
-            else:
-                BARK_KEY = f"https://api.day.app/{os.environ['BARK_KEY']}"
-        # 本地只填写设备码的用户
-        elif BARK_KEY and BARK_KEY.find(
-            'https') == -1 and BARK_KEY.find('http') == -1:
-            BARK_KEY = f'https://api.day.app/{BARK_KEY}'
-
-        BARK_SOUND = self.BARK_SOUND
-        if 'BARK_SOUND' in os.environ:
-            BARK_SOUND = os.environ['BARK_SOUND']
-
-        url = f'{BARK_KEY}/{text} {status}/{parse.quote(desp)}'
-        data = {
-            'sound': BARK_SOUND
-        }
-        conf = ['Bark App', 'BARK_KEY', BARK_KEY, 'code', 200]
-        name, needs, token, text, code  = conf
-
-        return self.pushTemplate('get', url, params=data, name=name, needs=needs, token=token, text=text, code=code)
 
     def tgBot(self, text, status, desp):
         TG_BOT_TOKEN = self.TG_BOT_TOKEN
@@ -198,135 +122,6 @@ class Notify(object):
 
         return self.pushTemplate('post', url, data=data, name=name, needs=needs, token=token, text=text, code=code)
 
-    def ddBot(self, text, status, desp):
-        DD_BOT_TOKEN = self.DD_BOT_TOKEN
-        if 'DD_BOT_TOKEN' in os.environ:
-            DD_BOT_TOKEN = os.environ['DD_BOT_TOKEN']
-
-        DD_BOT_SECRET = self.DD_BOT_SECRET
-        if 'DD_BOT_SECRET' in os.environ:
-            DD_BOT_SECRET = os.environ['DD_BOT_SECRET']
-
-        url = ''
-        if DD_BOT_TOKEN:
-            url = 'https://oapi.dingtalk.com/robot/send?' \
-                f'access_token={DD_BOT_TOKEN}'
-            if DD_BOT_SECRET:
-                secret = DD_BOT_SECRET
-                timestamp = int(round(time.time() * 1000))
-                secret_enc = bytes(secret).encode('utf-8')
-                string_to_sign = f'{timestamp}\n{secret}'
-                string_to_sign_enc = bytes(string_to_sign).encode('utf-8')
-                hmac_code = hmac.new(
-                    secret_enc, string_to_sign_enc,
-                    digestmod=hashlib.sha256).digest()
-                sign = parse.quote_plus(base64.b64encode(hmac_code))
-                url = 'https://oapi.dingtalk.com/robot/send?access_' \
-                    f'token={DD_BOT_TOKEN}&timestamp={timestamp}&sign={sign}'
-
-        data = {
-            'msgtype': 'text',
-            'text': {
-                'content': f'{text} {status}\n\n{desp}'
-            }
-        }
-        conf = ['钉钉机器人', 'DD_BOT_TOKEN', DD_BOT_TOKEN, 'errcode', 0]
-        name, needs, token, text, code  = conf
-
-        return self.pushTemplate('post', url, data=data, name=name, needs=needs, token=token, text=text, code=code)
-
-    def wwBot(self, text, status, desp):
-        WW_BOT_KEY = self.WW_BOT_KEY
-        if 'WW_BOT_KEY' in os.environ:
-            WW_BOT_KEY = os.environ['WW_BOT_KEY']
-
-        url = f'https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key={WW_BOT_KEY}'
-        data = {
-            'msgtype': 'text',
-            'text': {
-                'content': f'{text} {status}\n\n{desp}'
-            }
-        }
-        conf = ['企业微信机器人', 'WW_BOT_KEY', WW_BOT_KEY, 'errcode', 0]
-        name, needs, token, text, code  = conf
-
-        return self.pushTemplate('post', url, json=data, name=name, needs=needs, token=token, text=text, code=code)
-
-    def get_wwtoken(self):
-        WW_ID = self.WW_ID
-        if 'WW_ID' in os.environ:
-            WW_ID = os.environ['WW_ID']
-
-        WW_APP_SECRET = self.WW_APP_SECRET
-        if 'WW_APP_SECRET' in os.environ:
-            WW_APP_SECRET = os.environ['WW_APP_SECRET']
-
-        if WW_ID and WW_APP_SECRET:
-            url = 'https://qyapi.weixin.qq.com/cgi-bin/gettoken'
-            data = {
-                'corpid': WW_ID,
-                'corpsecret': WW_APP_SECRET
-            }
-
-            try:
-                response = req.to_python(
-                    req.request('get', url, params=data).text)
-                rspcode = response['errcode']
-            except Exception as e:
-                log.error(e)
-            else:
-                if rspcode == 0:
-                    log.info('access_token 获取成功')
-                    return response['access_token']
-                else:
-                    log.error(f'access_token 获取失败:\n{response}')
-        else:
-            log.info('企业微信应用 🚫')
-            # log.info('企业微信应用 推送所需的 WW_ID 和 WW_APP_SECRET 未设置, 正在跳过...')
-
-    def wwApp(self, text, status, desp):
-        WW_APP_USERID = self.WW_APP_USERID
-        if 'WW_APP_USERID' in os.environ:
-            WW_APP_USERID = os.environ['WW_APP_USERID']
-
-        WW_APP_AGENTID = self.WW_APP_AGENTID
-        if 'WW_APP_AGENTID' in os.environ:
-            WW_APP_AGENTID = os.environ['WW_APP_AGENTID']
-
-        token = ''
-        if WW_APP_USERID and WW_APP_AGENTID:
-            token = 'token'
-        access_token = self.get_wwtoken()
-
-        if access_token:
-            url = f'https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token={access_token}'
-            data = {
-                'touser': WW_APP_USERID,
-                'msgtype': 'text',
-                'agentid': WW_APP_AGENTID,
-                'text': {
-                    'content': f'{text} {status}\n\n{desp}'
-                }
-            }
-            conf = ['企业微信应用', 'WW_APP_USERID 和 WW_APP_AGENTID', token, 'errcode', 0]
-            name, needs, token, text, code  = conf
-
-            return self.pushTemplate('post', url, json=data, name=name, needs=needs, token=token, text=text, code=code)
-
-    def iGot(self, text, status, desp):
-        IGOT_KEY = self.IGOT_KEY
-        if 'IGOT_KEY' in os.environ:
-            IGOT_KEY = os.environ['IGOT_KEY']
-
-        url = f'https://push.hellyw.com/{IGOT_KEY}'
-        data = {
-            'title': f'{text} {status}',
-            'content': desp
-        }
-        conf = ['iGot', 'IGOT_KEY', IGOT_KEY, 'ret', 0]
-        name, needs, token, text, code  = conf
-
-        return self.pushTemplate('post', url, data=data, name=name, needs=needs, token=token, text=text, code=code)
 
     def pushPlus(self, text, status, desp):
         PUSH_PLUS_TOKEN = self.PUSH_PLUS_TOKEN
@@ -390,15 +185,7 @@ class Notify(object):
         if not hide:
             log.info(f'签到结果: {status}\n\n{msg}')
         log.info('准备推送通知...')
-
-        self.serverChan(app, status, msg)
-        self.coolPush(app, status, msg)
-        self.bark(app, status, msg)
         self.tgBot(app, status, msg)
-        self.ddBot(app, status, msg)
-        self.wwBot(app, status, msg)
-        self.wwApp(app, status, msg)
-        self.iGot(app, status, msg)
         self.pushPlus(app, status, msg)
         self.custPush(app, status, msg)
 
