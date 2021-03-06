@@ -99,11 +99,11 @@ log.basicConfig(level=CONFIG.LOG_LEVEL)
 
 
 MESSAGE_TEMPLATE = '''
-    {today:} <br>
-    🔅[{region_name}]{uid} <br>
-    今日奖励: {award_name} × {award_cnt} <br>
-    本月累签: {total_sign_day} 天 <br>
-    签到结果: {status} <br>
+    <br>{today:#^16}<br>
+    🔅[{region_name}]{uid}<br>
+    今日奖励: {award_name} × {award_cnt}<br>
+    本月累签: {total_sign_day} 天<br>
+    签到结果: {status}<br>
     {end:#^28}'''
 
 CONFIG.MESSAGE_TEMPLATE = MESSAGE_TEMPLATE
